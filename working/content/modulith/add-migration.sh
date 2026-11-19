@@ -22,16 +22,16 @@ migration=$2
 # in one project, and each owns one shared table. "Outbox" and "Inbox" are therefore reserved names
 # here — a feature of either name would collide with its context in update-database.sh and the CI
 # migration check too, so do not create one.
-output=Data/Migrations
 if [ "$feature" = "Outbox" ] || [ "$feature" = "Inbox" ]; then
   project="src/SharedKernel/ModulithTemplate.SharedKernel.Outbox/ModulithTemplate.SharedKernel.Outbox.csproj"
   context="${feature}Context"
   # The two contexts share a project, so their migrations need folders of their own.
-  if [ "$feature" = "Inbox" ]; then output=Data/InboxMigrations; fi
+  output=Data/${feature}Migrations
   test -f "$project" || { echo "The outbox project is missing (expected $project)" >&2; exit 1; }
 else
   project="src/Features/$feature/ModulithTemplate.Features.$feature.Infrastructure/ModulithTemplate.Features.$feature.Infrastructure.csproj"
   context="${feature}Context"
+  output=Data/Migrations
   test -f "$project" || { echo "No such feature: $feature (expected $project)" >&2; exit 1; }
 fi
 

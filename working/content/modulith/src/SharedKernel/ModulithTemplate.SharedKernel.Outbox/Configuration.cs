@@ -17,6 +17,8 @@ public static class Configuration
     /// Deliberately not <c>AddModuleDbContext</c>: that attaches domain event dispatch, and the
     /// outbox table holds no aggregates. The library names the message columns itself, so the snake
     /// case convention here only carries the index names into the style the rest of the DDL uses.
+    /// Its migrations history table is suffixed because <see cref="InboxContext"/> shares the schema:
+    /// with one table, a migration ID both contexts happened to generate would be skipped silently.
     /// </remarks>
     /// <param name="services">The service collection to register into.</param>
     /// <param name="configuration">Supplies the <c>PostgresConnection</c> connection string.</param>
@@ -30,7 +32,7 @@ public static class Configuration
         return services.AddDbContext<OutboxContext>(options => options
             .UseNpgsql(
                 connectionString,
-                pg => pg.MigrationsHistoryTable("__EFMigrationsHistory", OutboxSchema.Name))
+                pg => pg.MigrationsHistoryTable("__EFMigrationsHistory_Outbox", OutboxSchema.Name))
             .UseSnakeCaseNamingConvention());
     }
 
@@ -39,8 +41,7 @@ public static class Configuration
     /// library's inbox worker claims through.
     /// </summary>
     /// <remarks>
-    /// Its migrations history table is named apart from <see cref="OutboxContext"/>'s, which shares
-    /// the schema.
+    /// Its migrations history table is suffixed for the same reason as <see cref="OutboxContext"/>'s.
     /// </remarks>
     /// <param name="services">The service collection to register into.</param>
     /// <param name="configuration">Supplies the <c>PostgresConnection</c> connection string.</param>
